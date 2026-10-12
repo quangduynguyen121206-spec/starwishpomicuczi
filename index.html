@@ -4,18 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sao Ước Nguyện</title>
+    
+    <!-- Favicon & Apple Touch Icon -->
     <link rel="icon" type="image/png" href="Screenshot 2026-10-12 171333.png">
     <link rel="apple-touch-icon" href="Screenshot 2026-10-12 171333.png">
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Custom glow animations */
         @keyframes pulseGlow {
             0%, 100% {
+                -webkit-filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.8)) drop-shadow(0 0 40px rgba(59, 130, 246, 0.6));
                 filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.8)) drop-shadow(0 0 40px rgba(59, 130, 246, 0.6));
                 transform: scale(1);
             }
             50% {
+                -webkit-filter: drop-shadow(0 0 35px rgba(168, 85, 247, 1)) drop-shadow(0 0 70px rgba(59, 130, 246, 0.9));
                 filter: drop-shadow(0 0 35px rgba(168, 85, 247, 1)) drop-shadow(0 0 70px rgba(59, 130, 246, 0.9));
                 transform: scale(1.08);
             }
@@ -29,33 +34,40 @@
             animation: pulseGlow 3s ease-in-out infinite, floatStar 5s ease-in-out infinite;
             cursor: pointer;
             transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            will-change: transform, filter; /* Ép cả PC và iPhone tăng tốc phần cứng GPU */
+            touch-action: manipulation; /* Giúp tối ưu phản hồi chạm trên màn hình cảm ứng */
         }
 
         .magical-star:hover {
             transform: scale(1.15) rotate(5deg);
         }
 
-        /* Supernova intense brightening animation (in-place) */
+        /* Supernova intense brightening animation (Tối ưu đa nền tảng) */
         @keyframes supernovaBurst {
             0% {
+                -webkit-filter: drop-shadow(0 0 20px rgba(254, 240, 138, 0.8)) drop-shadow(0 0 40px rgba(168, 85, 247, 0.6));
                 filter: drop-shadow(0 0 20px rgba(254, 240, 138, 0.8)) drop-shadow(0 0 40px rgba(168, 85, 247, 0.6));
                 transform: scale(1);
             }
             30% {
+                -webkit-filter: drop-shadow(0 0 90px rgba(255, 255, 255, 1)) drop-shadow(0 0 160px rgba(253, 224, 71, 1)) drop-shadow(0 0 240px rgba(236, 72, 153, 1));
                 filter: drop-shadow(0 0 90px rgba(255, 255, 255, 1)) drop-shadow(0 0 160px rgba(253, 224, 71, 1)) drop-shadow(0 0 240px rgba(236, 72, 153, 1));
                 transform: scale(1.45) rotate(15deg);
             }
             60% {
+                -webkit-filter: drop-shadow(0 0 120px rgba(255, 255, 255, 1)) drop-shadow(0 0 200px rgba(250, 204, 21, 1));
                 filter: drop-shadow(0 0 120px rgba(255, 255, 255, 1)) drop-shadow(0 0 200px rgba(250, 204, 21, 1));
                 transform: scale(1.3) rotate(30deg);
             }
             100% {
+                -webkit-filter: drop-shadow(0 0 25px rgba(168, 85, 247, 0.8)) drop-shadow(0 0 50px rgba(59, 130, 246, 0.6));
                 filter: drop-shadow(0 0 25px rgba(168, 85, 247, 0.8)) drop-shadow(0 0 50px rgba(59, 130, 246, 0.6));
                 transform: scale(1) rotate(0deg);
             }
         }
 
         .supernova-active {
+            -webkit-animation: supernovaBurst 1.6s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
             animation: supernovaBurst 1.6s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
         }
 
@@ -323,7 +335,6 @@
         function animateSky() {
             ctx.clearRect(0, 0, width, height);
             
-            // Draw gradient background
             const bgGradient = ctx.createLinearGradient(0, 0, 0, height);
             bgGradient.addColorStop(0, '#030712');
             bgGradient.addColorStop(0.5, '#0f172a');
@@ -331,19 +342,16 @@
             ctx.fillStyle = bgGradient;
             ctx.fillRect(0, 0, width, height);
 
-            // Update & draw background stars
             stars.forEach(star => {
                 star.update();
                 star.draw();
             });
 
-            // Update & draw ambient shooting stars
             shootingStars.forEach(sStar => {
                 sStar.update();
                 sStar.draw();
             });
 
-            // Update & draw burst particles
             for (let i = burstParticles.length - 1; i >= 0; i--) {
                 let p = burstParticles[i];
                 p.update();
@@ -366,16 +374,19 @@
         const toastNotification = document.getElementById('toastNotification');
         const toastText = document.getElementById('toastText');
 
-        // Form state variables
         let selectedSender = '';
         let selectedPrice = '';
 
-        // Open Modal when clicking center star
-        centerStar.addEventListener('click', () => {
+        // Open Modal (Hỗ trợ tốt cả click chuột máy tính lẫn chạm cảm ứng trên iPhone)
+        const openModalHandler = (e) => {
+            if (e.cancelable) e.preventDefault();
             wishModal.classList.remove('modal-enter');
             wishModal.classList.add('modal-active');
             instructionBox.style.opacity = '0.4';
-        });
+        };
+
+        centerStar.addEventListener('click', openModalHandler);
+        centerStar.addEventListener('pointerdown', openModalHandler);
 
         // Close Modal
         function closeModal() {
@@ -420,7 +431,7 @@
             }, 4000);
         }
 
-        // Handle Form Submission matching user's Google Apps Script JSON structure
+        // Handle Form Submission
         wishForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const wishText = document.getElementById('wishInput').value.trim();
@@ -438,7 +449,6 @@
                 return;
             }
 
-            // Google Apps Script submission integration URLs
             const scriptUrls = {
                 'qduy': 'https://script.google.com/macros/s/AKfycbxpfkTg6weWGDyUVh8eD5wjDvxjT68YVVO5t03IXQwuBEzE-giiy6NEqKzAWpmJ5i_i/exec',
                 'nminh': 'https://script.google.com/macros/s/AKfycbzo4TY7t24GDgcJc0MVg3P3URECJR3oMhBshcJ3WRvb-hwgZGBPEW8MdSrBzo6lRL71RA/exec'
@@ -446,7 +456,6 @@
 
             const targetUrl = scriptUrls[selectedSender];
             if (targetUrl) {
-                // Match exact property keys required by your GAS code: user, amount, wish
                 const payload = {
                     user: selectedSender,
                     amount: selectedPrice,
@@ -460,13 +469,11 @@
                 }).catch(err => console.error('Google Sheet Error:', err));
             }
 
-            // Close modal form smoothly
             closeModal();
 
-            // Trigger intense in-place brightening supernova animation
+            // Trigger supernova animation
             centerStar.classList.add('supernova-active');
 
-            // Spawn particle burst at center of screen
             const rect = centerStar.getBoundingClientRect();
             const centerX = rect.left + rect.width / 2;
             const centerY = rect.top + rect.height / 2;
@@ -475,12 +482,11 @@
                 burstParticles.push(new BurstParticle(centerX, centerY));
             }
 
+            // Đã bỏ dấu ngoặc vuông theo yêu cầu
             showToast(`✨ Ước nguyện của ${selectedSender} đã bừng sáng và được gửi gắm vào vũ trụ!`);
 
-            // Reset after animation finishes
             setTimeout(() => {
                 centerStar.classList.remove('supernova-active');
-                // Reset form state
                 wishForm.reset();
                 selectedSender = '';
                 selectedPrice = '';
