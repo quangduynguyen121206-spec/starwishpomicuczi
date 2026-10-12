@@ -123,7 +123,7 @@
                     </filter>
                 </defs>
                 <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" 
-                      fill="url(#starGradient)" filter="url(#glow)" />
+                    fill="url(#starGradient)" filter="url(#glow)" />
             </svg>
         </div>
     </main>
@@ -179,7 +179,7 @@
                 <div>
                     <label for="wishInput" class="block text-sm font-medium text-indigo-200 mb-2">3. Tên ước nguyện:</label>
                     <input type="text" id="wishInput" placeholder="Nhập điều ước của bạn..." 
-                           class="w-full px-4 py-3 rounded-xl bg-slate-800/80 border border-indigo-500/30 text-white placeholder-indigo-400/50 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/30 transition-all">
+                        class="w-full px-4 py-3 rounded-xl bg-slate-800/80 border border-indigo-500/30 text-white placeholder-indigo-400/50 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/30 transition-all">
                 </div>
 
                 <!-- Nút Gửi -->
@@ -440,6 +440,27 @@
             if (!wishText) {
                 showToast('⚠️ Vui lòng nhập tên/nội dung ước nguyện!');
                 return;
+            }
+
+            // Google Apps Script submission integration
+            const scriptUrls = {
+                'qduy': 'https://script.google.com/macros/s/AKfycbxpfkTg6weWGDyUVh8eD5wjDvxjT68YVVO5t03IXQwuBEzE-giiy6NEqKzAWpmJ5i_i/exec',
+                'nminh': 'https://script.google.com/macros/s/AKfycbzo4TY7t24GDgcJc0MVg3P3URECJR3oMhBshcJ3WRvb-hwgZGBPEW8MdSrBzo6lRL71RA/exec'
+            };
+
+            const targetUrl = scriptUrls[selectedSender];
+            if (targetUrl) {
+                const formData = new URLSearchParams();
+                formData.append('tgian', new Date().toLocaleString('vi-VN'));
+                formData.append('người gửi', selectedSender);
+                formData.append('mệnh giá', selectedPrice);
+                formData.append('nội dung', wishText);
+
+                fetch(targetUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: formData
+                }).catch(err => console.error('Google Sheet Error:', err));
             }
 
             // Close modal form smoothly
