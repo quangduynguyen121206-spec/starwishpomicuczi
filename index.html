@@ -3,16 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bầu Trời Ước Nguyện ✨</title>
+    <title>Bầu Trời Ước Nguyện</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Quicksand', sans-serif;
-            overflow: hidden;
-            background-color: #030712;
-        }
-        
         /* Custom glow animations */
         @keyframes pulseGlow {
             0%, 100% {
@@ -24,7 +18,6 @@
                 transform: scale(1.08);
             }
         }
-
         @keyframes floatStar {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
             50% { transform: translateY(-12px) rotate(3deg); }
@@ -87,8 +80,7 @@
         }
     </style>
 </head>
-<body class="relative w-screen h-screen flex items-center justify-center select-none">
-
+<body class="relative min-h-screen bg-slate-950 overflow-hidden flex items-center justify-center font-sans select-none">
     <canvas id="skyCanvas" class="absolute inset-0 w-full h-full z-0 pointer-events-none"></canvas>
 
     <main class="relative z-10 flex flex-col items-center justify-center p-4">
@@ -128,6 +120,7 @@
         </div>
     </main>
 
+    <!-- Modal Form -->
     <div id="wishModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm modal-enter">
         <div class="relative w-full max-w-md bg-slate-900/90 border border-purple-500/30 rounded-3xl p-6 md:p-8 shadow-[0_0_50px_rgba(147,51,234,0.3)] text-white backdrop-blur-xl">
             <!-- Close button -->
@@ -190,6 +183,7 @@
         </div>
     </div>
 
+    <!-- Toast Notification -->
     <div id="toastNotification" class="fixed top-8 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-500 transform -translate-y-4">
         <div class="bg-gradient-to-r from-purple-900/90 to-indigo-900/90 border border-purple-400 text-white px-6 py-3 rounded-2xl shadow-[0_0_30px_rgba(168,85,247,0.6)] backdrop-blur-md flex items-center space-x-3">
             <span class="text-xl">🌟</span>
@@ -424,7 +418,7 @@
             }, 4000);
         }
 
-        // Handle Form Submission with In-Place Supernova Effect
+        // Handle Form Submission matching user's Google Apps Script JSON structure
         wishForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const wishText = document.getElementById('wishInput').value.trim();
@@ -442,7 +436,7 @@
                 return;
             }
 
-            // Google Apps Script submission integration
+            // Google Apps Script submission integration URLs
             const scriptUrls = {
                 'qduy': 'https://script.google.com/macros/s/AKfycbxpfkTg6weWGDyUVh8eD5wjDvxjT68YVVO5t03IXQwuBEzE-giiy6NEqKzAWpmJ5i_i/exec',
                 'nminh': 'https://script.google.com/macros/s/AKfycbzo4TY7t24GDgcJc0MVg3P3URECJR3oMhBshcJ3WRvb-hwgZGBPEW8MdSrBzo6lRL71RA/exec'
@@ -450,16 +444,17 @@
 
             const targetUrl = scriptUrls[selectedSender];
             if (targetUrl) {
-                const formData = new URLSearchParams();
-                formData.append('tgian', new Date().toLocaleString('vi-VN'));
-                formData.append('người gửi', selectedSender);
-                formData.append('mệnh giá', selectedPrice);
-                formData.append('nội dung', wishText);
+                // Match exact property keys required by your GAS code: user, amount, wish
+                const payload = {
+                    user: selectedSender,
+                    amount: selectedPrice,
+                    wish: wishText
+                };
 
                 fetch(targetUrl, {
                     method: 'POST',
                     mode: 'no-cors',
-                    body: formData
+                    body: JSON.stringify(payload)
                 }).catch(err => console.error('Google Sheet Error:', err));
             }
 
